@@ -1,0 +1,45 @@
+---
+import Layout from "fulldev-ui/structures/Layout.astro";
+// import Section from 'fulldev-ui/structures/Section.astro'
+// import Intro from "fulldev-ui/blocks/Intro1.astro";
+import Content from "fulldev-ui/blocks/Content1.astro";
+import Channels from "fulldev-ui/components/Channels.astro";
+import {getCollection} from "astro:content";
+
+export async function getStaticPaths() {
+    const hashcodes = await getCollection("hashcodes");
+    return hashcodes.map((hashcode) => ({
+        params: {id: hashcode.id},
+        props: {hashcode: hashcode},
+    }));
+}
+
+const {hashcode} = Astro.props;
+---
+
+<Layout class="dark">
+    <Content
+            tagline={hashcode.data.year}
+            heading={hashcode.data.title}
+            paragraph="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Nulla facilisi. Nulla facilisi. Sed do eiusmod tempor."
+            buttons={[{text: 'Get Started'}, {text: 'View Components'}]}
+    >
+        <Channels
+                channels={[
+                    {
+                        variant: 'primary',
+                        icon: 'pdf',
+                        heading: hashcode.data.pdf.name,
+                        text: 'The problem statement',
+                        href: hashcode.data.pdf.url,
+                        target: "_blank"
+                    },
+                    ...hashcode.data.inputs.map(input => ({
+                        icon: 'file',
+                        heading: input.name,
+                        text: 'Input file',
+                        href: input.url,
+                    }))]}
+        />
+    </Content>
+</Layout>

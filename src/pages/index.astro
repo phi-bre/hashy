@@ -6,17 +6,17 @@ import { getCollection } from "astro:content";
 const hashcodes = await getCollection("hashcodes");
 ---
 
-<Layout>
+<Layout class="dark">
     <Projects
         tagline="Hashy"
         heading="Hashcodes"
         paragraph="Google Hash Code was a global team programming competition organized by Google, where participants solved real-world engineering problems in algorithms and optimization within a limited time."
-        buttons={[{text: 'Lorem ipsum'}, {text: 'Lorem ipsum'}]}
-        image={{src: '/images/placeholder-landscape.webp'}}
+        buttons={[{text: 'Github', href: 'https://github.com/phi-bre/hashy'}, {text: 'Lorem ipsum'}]}
         cards={hashcodes.map(hashcode => ({
             badges: [hashcode.data.year, hashcode.data.round],
             heading: hashcode.data.title,
             paragraph: '',
+            href: `/${hashcode.id}`,
             image: {src: ''},
         }))}
     />
