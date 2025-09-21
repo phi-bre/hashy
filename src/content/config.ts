@@ -1,5 +1,4 @@
 import {defineCollection, z} from "astro:content";
-import {Document} from "mupdf";
 
 export const collections = {
     hashcodes: defineCollection({
@@ -14,30 +13,43 @@ export const collections = {
             )
 
             const pdfGlob = import.meta.glob("./hashcodes/**/*.pdf", {query: "?url"});
+            const metadataGlob = import.meta.glob("./hashcodes/**/*.json", {
+                eager: true,
+                import: "default",
+            });
             const inputsGlob = import.meta.glob(
                 ["./hashcodes/**/*.in", "./hashcodes/**/*.in/*.txt"],
                 {query: "?url"},
             );
+
             const allPdfFiles = await globToFiles(pdfGlob);
-            const allInputFiles = await globToFiles(inputsGlob)
+            const allInputFiles = await globToFiles(inputsGlob);
 
-            return allPdfFiles.map((pdf) => {
-                const [dot, type, year, round] = pdf.path.split("/");
+            const pdfByPath = new Map(allPdfFiles.map((file) => [file.path, file]));
+
+            return Object.entries(metadataGlob).map(([jsonPath, metadata]) => {
+                const {year, round, title, description} = metadata as {
+                    year: string;
+                    round: string;
+                    title: string;
+                    description: string;
+                };
+
+                const pathSegments = jsonPath.split("/");
+                const type = pathSegments.at(1) ?? "hashcodes";
                 const id = `${type}-${year}-${round}`;
-                const folder = [dot, type, year, round].join("/");
-                const inputs = allInputFiles.filter((file) => file.path.startsWith(folder));
-                const document = Document.openDocument("src/content/" + pdf.path);
-                const page = JSON.parse(
-                    document.loadPage(0).toStructuredText().asJSON(),
-                );
-                const lines = page.blocks
-                    .flatMap((block) => block.lines)
-                    .map((line) => line.text.trim());
-                const [title] = lines
-                    .filter((text) => text.length > 3) // Filter things like "EN"
-                    .filter((text) => !/\d\d\d\d/.test(text));
+                const folder = pathSegments.slice(0, -1).join("/");
 
-                return {id, type, year, round, title, pdf, inputs};
+                const pdfPath = jsonPath.replace(/\.json$/u, ".pdf");
+                const pdf = pdfByPath.get(pdfPath);
+                if (!pdf) {
+                    throw new Error(`Missing PDF for metadata ${jsonPath}`);
+                }
+
+                const inputs = allInputFiles.filter((file) => file.path.startsWith(folder));
+
+                console.log({id, type, year, round, title, description, pdf, inputs})
+                return {id, type, year, round, title, description, pdf, inputs};
             });
         },
         schema: ({image}) =>
@@ -46,10 +58,10 @@ export const collections = {
                 year: z.string(),
                 round: z.string(),
                 title: z.string(),
-                // description: z.string(),
+                description: z.string(),
                 // cover: image(),
-                pdf: z.object({name: z.string(), url: z.string()}),
-                inputs: z.object({name: z.string(), url: z.string()}).array(),
+                pdf: z.object({name: z.string(), url: z.string()}).optional(),
+                inputs: z.object({name: z.string(), url: z.string()}).array().optional(),
             }),
     }),
 };

@@ -15,7 +15,7 @@ const hashcodes = await getCollection("hashcodes");
         cards={hashcodes.map(hashcode => ({
             badges: [hashcode.data.year, hashcode.data.round],
             heading: hashcode.data.title,
-            paragraph: '',
+            paragraph: hashcode.data.description,
             href: `/${hashcode.id}`,
             image: {src: ''},
         }))}

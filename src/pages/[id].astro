@@ -10,7 +10,7 @@ export async function getStaticPaths() {
     const hashcodes = await getCollection("hashcodes");
     return hashcodes.map((hashcode) => ({
         params: {id: hashcode.id},
-        props: {hashcode: hashcode},
+        props: {hashcode},
     }));
 }
 
@@ -21,7 +21,7 @@ const {hashcode} = Astro.props;
     <Content
             tagline={hashcode.data.year}
             heading={hashcode.data.title}
-            paragraph="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Nulla facilisi. Nulla facilisi. Sed do eiusmod tempor."
+            paragraph={hashcode.data.description}
             buttons={[{text: 'Get Started'}, {text: 'View Components'}]}
     >
         <Channels
