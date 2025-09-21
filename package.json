@@ -1,15 +1,18 @@
 {
-  "name": "hashy",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "astro": "^5.13.9",
-    "fulldev-ui": "^0.6.5"
-  }
+	"name": "hashy",
+	"type": "module",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"format": "biome format --write",
+		"astro": "astro"
+	},
+	"dependencies": {
+		"@biomejs/biome": "2.2.4",
+		"astro": "^4.16.19",
+		"fulldev-ui": "^0.6.5",
+		"mupdf": "^1.26.4"
+	}
 }
