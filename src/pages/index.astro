@@ -1,0 +1,34 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Projects from 'fulldev-ui/blocks/Projects1.astro'
+
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+
+<Layout>
+    <Projects
+            tagline="Lorem ipsum"
+            heading="Lorem ipsum dolor sit"
+            paragraph="Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus quia, nulla! Maiores et perferendis eaque, exercitationem praesentium nihil."
+            buttons={[{text: 'Lorem ipsum'}, {text: 'Lorem ipsum'}]}
+            image={{src: '/images/placeholder-landscape.webp'}}
+            cards={[
+                {
+                    badges: ['Lorem ipsum', 'Lorem ipsum'],
+                    heading: 'Lorem ipsum',
+                    paragraph:
+                        'Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus quia, nulla! Maiores et perferendis eaque, exercitationem praesentium nihil.',
+                    image: {src: '/images/placeholder-landscape.webp'},
+                },
+                {
+                    badges: ['Lorem ipsum'],
+                    heading: 'Lorem ipsum',
+                    paragraph:
+                        'Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptatibus quia, nulla! Maiores et perferendis eaque, exercitationem praesentium nihil.',
+                    image: {src: '/images/placeholder-landscape.webp'},
+                },
+            ]}
+    />
+</Layout>
