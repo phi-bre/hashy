@@ -10,5 +10,5 @@ vercel_runtime = { version = "1" }
 
 [[bin]]
 name = "handler"
-path = "src/api/handler.rs"
+path = "api/handler.rs"
 
