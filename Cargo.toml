@@ -1,0 +1,14 @@
+[package]
+name = "hashy"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["macros"] }
+serde_json = { version = "1", features = ["raw_value"] }
+vercel_runtime = { version = "1" }
+
+[[bin]]
+name = "handler"
+path = "src/api/handler.rs"
+
