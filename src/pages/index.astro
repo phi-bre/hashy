@@ -1,23 +1,118 @@
 ---
-import Projects from "fulldev-ui/blocks/Projects1.astro";
-import Layout from "fulldev-ui/structures/Layout.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import { hashcodeSlug } from "../utils/slug";
 
 const hashcodes = await getCollection("hashcodes");
----
+const groupedByYear = new Map<string, CollectionEntry<"hashcodes">[]>();
+for (const entry of hashcodes) {
+        const yearEntries = groupedByYear.get(entry.data.year) ?? [];
+        yearEntries.push(entry);
+        groupedByYear.set(entry.data.year, yearEntries);
+}
 
-<Layout class="dark">
-    <Projects
-        tagline="Hashy"
-        heading="Hashcodes"
-        paragraph="Google Hash Code was a global team programming competition organized by Google, where participants solved real-world engineering problems in algorithms and optimization within a limited time."
-        buttons={[{icon: 'brand-github',text: 'Github', href: 'https://github.com/phi-bre/hashy'}, {icon: 'coffee',text: 'Buy me a coffee', href: 'https://buymeacoffee.com/phibre' }]}
-        cards={hashcodes.map(hashcode => ({
-            badges: [hashcode.data.year, hashcode.data.round],
-            heading: hashcode.data.title,
-            paragraph: hashcode.data.description,
-            href: `/${hashcode.id}`,
-            image: {src: ''},
-        }))}
-    />
-</Layout>
+const sortedYears = [...groupedByYear.keys()].sort((a, b) => {
+        const aNumber = Number.parseInt(a, 10);
+        const bNumber = Number.parseInt(b, 10);
+        if (!Number.isNaN(aNumber) && !Number.isNaN(bNumber)) {
+                return bNumber - aNumber;
+        }
+
+        if (Number.isNaN(aNumber) && Number.isNaN(bNumber)) {
+                return b.localeCompare(a, undefined, { sensitivity: "base" });
+        }
+
+        return Number.isNaN(aNumber) ? 1 : -1;
+});
+---
+<BaseLayout title="Hashy — Google Hash Code archive" description="Browse Google Hash Code problems, statements, and input files collected over the years.">
+        <section class="py-16 sm:py-24">
+                <div class="container">
+                        <div class="panel px-8 py-14 sm:px-12 sm:py-16">
+                                <div class="mx-auto max-w-3xl">
+                                        <span class="text-xs font-medium uppercase tracking-[0.32em] text-muted-foreground">Hashy</span>
+                                        <h1 class="mt-6 text-4xl font-semibold sm:text-5xl">The Google Hash Code archive.</h1>
+                                        <p class="mt-4 text-base text-muted-foreground sm:text-lg">
+                                                Every round, statement, and dataset organised for quick reference and download.
+                                        </p>
+                                        <div class="mt-10 flex flex-wrap items-center gap-3">
+                                                <a
+                                                        class="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                        href="#archive"
+                                                >
+                                                        Browse rounds
+                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                <path d="m7 17 5-5-5-5" />
+                                                                <path d="M17 17V7" />
+                                                        </svg>
+                                                </a>
+                                                <a
+                                                        class="inline-flex items-center gap-2 rounded-full border border-border/60 px-5 py-2 text-sm font-medium text-muted-foreground transition hover:border-border/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                        href="https://github.com/phi-bre/hashy"
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                >
+                                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                                                <path
+                                                                        fill-rule="evenodd"
+                                                                        d="M12 .5C5.649.5.5 5.648.5 12c0 5.086 3.292 9.392 7.866 10.915.575.105.786-.25.786-.556 0-.275-.01-1.003-.015-1.969-3.198.695-3.872-1.54-3.872-1.54-.523-1.328-1.278-1.683-1.278-1.683-1.046-.716.08-.702.08-.702 1.157.082 1.766 1.188 1.766 1.188 1.028 1.762 2.696 1.253 3.352.958.104-.745.402-1.253.732-1.541-2.544-.291-5.239-1.277-5.239-5.686 0-1.256.45-2.283 1.187-3.087-.12-.29-.515-1.463.113-3.05 0 0 .965-.309 3.162 1.18a10.95 10.95 0 0 1 2.878-.387c.976.005 1.96.132 2.878.387 2.196-1.49 3.16-1.18 3.16-1.18.63 1.588.235 2.761.116 3.05.74.804 1.186 1.831 1.186 3.087 0 4.42-2.69 5.391-5.256 5.675.414.355.782 1.057.782 2.13 0 1.54-.014 2.783-.014 3.162 0 .308.208.667.792.554C20.213 21.387 23.5 17.084 23.5 12 23.5 5.648 18.352.5 12 .5Z"
+                                                                />
+                                                        </svg>
+                                                        View on GitHub
+                                                </a>
+                                        </div>
+                                </div>
+                        </div>
+                </div>
+        </section>
+
+        <section class="pb-20" id="archive">
+                <div class="container space-y-12">
+                        {sortedYears.map((year, index) => {
+                                const entries = groupedByYear.get(year) ?? [];
+                                return (
+                                        <div class={`surface px-6 py-8 sm:px-10 sm:py-10`} id={`year-${year}`}>
+                                                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                                                        <div>
+                                                                <p class="text-xs uppercase tracking-[0.32em] text-muted-foreground">Year</p>
+                                                                <h2 class="text-3xl font-semibold text-foreground sm:text-4xl">{year}</h2>
+                                                        </div>
+                                                        <p class="text-xs uppercase tracking-[0.24em] text-muted-foreground">{entries.length} round{entries.length === 1 ? "" : "s"}</p>
+                                                </div>
+                                                <div class="mt-8 grid gap-4 sm:grid-cols-2">
+                                                        {entries.map((hashcode) => {
+                                                                const slug = hashcodeSlug(hashcode);
+                                                                return (
+                                                                        <a
+                                                                                class="group flex h-full flex-col justify-between rounded-2xl border border-border/60 bg-background/60 p-5 transition hover:border-border/30 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                                                href={`/${slug}`}
+                                                                        >
+                                                                                <div class="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+                                                                                        <span>{hashcode.data.round}</span>
+                                                                                        <span class="inline-flex h-1 w-1 rounded-full bg-muted-foreground/40"></span>
+                                                                                        <span>{hashcode.data.year}</span>
+                                                                                </div>
+                                                                                <h3 class="mt-4 text-xl font-semibold text-foreground transition group-hover:text-foreground">
+                                                                                        {hashcode.data.title}
+                                                                                </h3>
+                                                                                <p class="mt-3 flex-1 text-sm text-muted-foreground">
+                                                                                        {hashcode.data.description}
+                                                                                </p>
+                                                                                <span class="mt-6 inline-flex items-center text-sm font-medium text-foreground/80 transition group-hover:text-foreground">
+                                                                                        Open details
+                                                                                        <svg class="ml-2 h-4 w-4 transition group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                                                <path d="M5 12h14" />
+                                                                                                <path d="m12 5 7 7-7 7" />
+                                                                                        </svg>
+                                                                                </span>
+                                                                        </a>
+                                                                );
+                                                        })}
+                                                </div>
+                                        </div>
+                                );
+                        })}
+                </div>
+        </section>
+</BaseLayout>

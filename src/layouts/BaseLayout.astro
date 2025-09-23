@@ -1,0 +1,39 @@
+---
+import "../styles/global.css";
+
+interface Props {
+        title?: string;
+        description?: string;
+        class?: string;
+}
+
+const {
+        title = "Hashy",
+        description = "Explore Google Hash Code challenges and resources",
+        class: className = "",
+} = Astro.props satisfies Props;
+---
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+        <head>
+                <meta charset="utf-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <title>{title}</title>
+                <meta name="description" content={description} />
+        </head>
+        <body class={`min-h-screen bg-background text-foreground antialiased` + (className ? ` ${className}` : "")}>
+                <div class="flex min-h-screen flex-col">
+                        <header class="border-b border-border/70 bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+                                <div class="container flex items-center gap-3 py-6 text-sm text-muted-foreground">
+                                        <a class="inline-flex items-center gap-2 font-semibold text-foreground" href="/">
+                                                <span class="flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-card text-lg font-bold text-foreground">#</span>
+                                                Hashy
+                                        </a>
+                                </div>
+                        </header>
+                        <main class="flex-1">
+                                <slot />
+                        </main>
+                </div>
+        </body>
+</html>

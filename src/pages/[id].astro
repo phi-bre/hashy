@@ -1,45 +1,156 @@
 ---
-import Layout from "fulldev-ui/structures/Layout.astro";
-// import Section from 'fulldev-ui/structures/Section.astro'
-// import Intro from "fulldev-ui/blocks/Intro1.astro";
-import Content from "fulldev-ui/blocks/Content1.astro";
-import Channels from "fulldev-ui/components/Channels.astro";
-import {getCollection} from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import { hashcodeSlug } from "../utils/slug";
 
 export async function getStaticPaths() {
-    const hashcodes = await getCollection("hashcodes");
-    return hashcodes.map((hashcode) => ({
-        params: {id: hashcode.id},
-        props: {hashcode},
-    }));
+        const hashcodes = await getCollection("hashcodes");
+        return hashcodes.map((hashcode) => ({
+                params: { id: hashcodeSlug(hashcode) },
+                props: { hashcode },
+        }));
 }
 
-const {hashcode} = Astro.props;
----
+const { hashcode } = Astro.props as { hashcode: CollectionEntry<"hashcodes"> };
 
-<Layout class="dark">
-    <Content
-            tagline={hashcode.data.year}
-            heading={hashcode.data.title}
-            paragraph={hashcode.data.description}
-            buttons={[{text: 'Get Started'}, {text: 'View Components'}]}
-    >
-        <Channels
-                channels={[
-                    {
-                        variant: 'primary',
-                        icon: 'pdf',
-                        heading: hashcode.data.pdf.name,
-                        text: 'The problem statement',
-                        href: hashcode.data.pdf.url,
-                        target: "_blank"
-                    },
-                    ...hashcode.data.inputs.map(input => ({
-                        icon: 'file',
-                        heading: input.name,
-                        text: 'Input file',
-                        href: input.url,
-                    }))]}
-        />
-    </Content>
-</Layout>
+const toUrl = async (resolver: () => Promise<unknown>) => {
+        const resolved = await resolver();
+        return typeof resolved === "string" ? resolved : (resolved as { default: string }).default;
+};
+
+const pdfModules = import.meta.glob('../content/hashcodes/**/*.pdf', { query: '?url' });
+const inputModules = import.meta.glob(['../content/hashcodes/**/*.in', '../content/hashcodes/**/*.in/*.txt'], { query: '?url' });
+
+const contentPrefix = '../content/hashcodes/';
+const entryBasePath = `${contentPrefix}${hashcode.id}`;
+
+const pdfKey = `${entryBasePath}.pdf` as keyof typeof pdfModules;
+const pdfResolver = pdfModules[pdfKey];
+const pdf = pdfResolver
+        ? {
+                name: pdfKey.split('/').at(-1) ?? '',
+                url: await toUrl(pdfResolver),
+        }
+        : null;
+
+const inputs = (
+        await Promise.all(
+                Object.entries(inputModules)
+                        .filter(([key]) => key.startsWith(`${entryBasePath}.in`))
+                        .map(async ([key, resolver]) => ({
+                                name: key.split('/').at(-1) ?? '',
+                                url: await toUrl(resolver),
+                        })),
+        )
+).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+const resources = {
+        pdf,
+        inputs,
+};
+const downloadsCount = resources.inputs.length + (resources.pdf ? 1 : 0);
+const downloadLabel = downloadsCount === 1 ? "file" : "files";
+---
+<BaseLayout title={`${hashcode.data.title} — Hashy`} description={hashcode.data.description}>
+        <section class="py-16 sm:py-24">
+                <div class="container space-y-12">
+                        <a class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-foreground" href="/">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="m15 18-6-6 6-6" />
+                                </svg>
+                                Back to archive
+                        </a>
+
+                        <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+                                <article class="surface px-6 py-8 sm:px-10 sm:py-12">
+                                        <div class="flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
+                                                <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
+                                                        {hashcode.data.year}
+                                                </span>
+                                                <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
+                                                        {hashcode.data.round}
+                                                </span>
+                                        </div>
+                                        <h1 class="mt-6 text-4xl font-semibold sm:text-5xl">{hashcode.data.title}</h1>
+                                        <p class="mt-4 max-w-3xl text-base text-muted-foreground sm:text-lg">
+                                                {hashcode.data.description}
+                                        </p>
+                                </article>
+
+                                <aside class="surface px-6 py-6 sm:px-8">
+                                        <div class="space-y-4">
+                                                <div>
+                                                        <p class="text-xs uppercase tracking-[0.32em] text-muted-foreground">Overview</p>
+                                                        <p class="mt-2 text-sm text-muted-foreground">Quick metadata for this challenge.</p>
+                                                </div>
+                                                <dl class="space-y-3 text-sm">
+                                                        <div class="flex items-center justify-between">
+                                                                <dt class="text-muted-foreground">Year</dt>
+                                                                <dd class="font-medium text-foreground">{hashcode.data.year}</dd>
+                                                        </div>
+                                                        <div class="flex items-center justify-between">
+                                                                <dt class="text-muted-foreground">Round</dt>
+                                                                <dd class="font-medium text-foreground capitalize">{hashcode.data.round}</dd>
+                                                        </div>
+                                                        <div class="flex items-center justify-between">
+                                                                <dt class="text-muted-foreground">Downloads</dt>
+                                                                <dd class="font-medium text-foreground">{downloadsCount} {downloadLabel}</dd>
+                                                        </div>
+                                                </dl>
+                                        </div>
+                                </aside>
+                        </div>
+
+                        <div class="surface px-6 py-8 sm:px-10">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                                <h2 class="text-lg font-semibold text-foreground">Downloads</h2>
+                                                <p class="text-sm text-muted-foreground">Direct links to the statement and input datasets.</p>
+                                        </div>
+                                        <span class="text-xs uppercase tracking-[0.3em] text-muted-foreground">{downloadsCount} {downloadLabel}</span>
+                                </div>
+                                <div class="mt-6 space-y-3">
+                                        {resources.pdf && (
+                                                <a
+                                                        class="group flex items-center justify-between rounded-xl border border-border/60 bg-background/60 px-5 py-4 transition hover:border-border/30 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                        href={resources.pdf.url}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                >
+                                                        <div>
+                                                                <p class="text-sm font-medium text-foreground">Problem statement</p>
+                                                                <p class="mt-1 text-sm text-muted-foreground">{resources.pdf.name}</p>
+                                                        </div>
+                                                        <svg class="h-5 w-5 text-muted-foreground transition group-hover:text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                <path d="M12 5v14" />
+                                                                <path d="m19 12-7 7-7-7" />
+                                                        </svg>
+                                                </a>
+                                        )}
+                                        {resources.inputs.map((input) => (
+                                                <a
+                                                        class="group flex items-center justify-between rounded-xl border border-border/60 bg-background/60 px-5 py-4 transition hover:border-border/30 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                        href={input.url}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                >
+                                                        <div>
+                                                                <p class="text-sm font-medium text-foreground">{input.name}</p>
+                                                                <p class="mt-1 text-xs uppercase tracking-[0.28em] text-muted-foreground">Input dataset</p>
+                                                        </div>
+                                                        <svg class="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                <path d="m9 18 6-6-6-6" />
+                                                        </svg>
+                                                </a>
+                                        ))}
+                                        {downloadsCount === 0 && (
+                                                <div class="rounded-xl border border-dashed border-border/60 bg-background/40 px-6 py-5 text-sm text-muted-foreground">
+                                                        No downloads available yet for this challenge.
+                                                </div>
+                                        )}
+                                </div>
+                        </div>
+                </div>
+        </section>
+</BaseLayout>

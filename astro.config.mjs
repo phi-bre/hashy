@@ -1,10 +1,14 @@
 // @ts-check
 import { defineConfig } from "astro/config";
-import fulldevUi from "fulldev-ui";
+import tailwind from "@astrojs/tailwind";
 
 // https://astro.build/config
 export default defineConfig({
-	integrations: [fulldevUi({})],
+	integrations: [
+		tailwind({
+			applyBaseStyles: false,
+		}),
+	],
 	experimental: {
 		contentLayer: true,
 	},
