@@ -1,6 +1,9 @@
 {
-    "year": "2017",
-    "round": "practice",
-    "title": "Pizza",
-    "description": "Slice a pizza grid into tasty servings that satisfy ingredient rules, balancing tomato and mushroom coverage so every piece stays within the constraints."
+	"year": "2017",
+	"round": "practice",
+	"title": "Pizza",
+	"description": "Slice a pizza grid into tasty servings that satisfy ingredient rules, balancing tomato and mushroom coverage so every piece stays within the constraints.",
+	"scoring": {
+		"enabled": true
+	}
 }

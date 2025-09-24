@@ -1,6 +1,9 @@
 {
-    "year": "2021",
-    "round": "practice",
-    "title": "Even more pizza",
-    "description": "Pick pizzas for indecisive friends, balancing flavors and slice totals to offer a satisfying spread within the ordering cap."
+	"year": "2021",
+	"round": "practice",
+	"title": "Even more pizza",
+	"description": "Pick pizzas for indecisive friends, balancing flavors and slice totals to offer a satisfying spread within the ordering cap.",
+	"scoring": {
+		"enabled": false
+	}
 }

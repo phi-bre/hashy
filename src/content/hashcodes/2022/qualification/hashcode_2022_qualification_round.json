@@ -1,6 +1,9 @@
 {
-    "year": "2022",
-    "round": "qualification",
-    "title": "Mentorship and Teamwork",
-    "description": "Pair mentors with mentees over weeks of sessions, arranging schedules that boost collaboration while honoring availability and goals."
+	"year": "2022",
+	"round": "qualification",
+	"title": "Mentorship and Teamwork",
+	"description": "Pair mentors with mentees over weeks of sessions, arranging schedules that boost collaboration while honoring availability and goals.",
+	"scoring": {
+		"enabled": false
+	}
 }

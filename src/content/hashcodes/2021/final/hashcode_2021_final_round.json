@@ -1,6 +1,9 @@
 {
-    "year": "2021",
-    "round": "final",
-    "title": "Software Engineering at Scale",
-    "description": "Schedule work for thousands of engineers in a monolithic codebase, coordinating dependencies and priorities so projects ship smoothly."
+	"year": "2021",
+	"round": "final",
+	"title": "Software Engineering at Scale",
+	"description": "Schedule work for thousands of engineers in a monolithic codebase, coordinating dependencies and priorities so projects ship smoothly.",
+	"scoring": {
+		"enabled": false
+	}
 }

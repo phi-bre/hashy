@@ -5,52 +5,70 @@ import type { CollectionEntry } from "astro:content";
 import { hashcodeSlug } from "../utils/slug";
 
 export async function getStaticPaths() {
-        const hashcodes = await getCollection("hashcodes");
-        return hashcodes.map((hashcode) => ({
-                params: { id: hashcodeSlug(hashcode) },
-                props: { hashcode },
-        }));
+	const hashcodes = await getCollection("hashcodes");
+	return hashcodes.map((hashcode) => ({
+		params: { id: hashcodeSlug(hashcode) },
+		props: { hashcode },
+	}));
 }
 
 const { hashcode } = Astro.props as { hashcode: CollectionEntry<"hashcodes"> };
 
 const toUrl = async (resolver: () => Promise<unknown>) => {
-        const resolved = await resolver();
-        return typeof resolved === "string" ? resolved : (resolved as { default: string }).default;
+	const resolved = await resolver();
+	return typeof resolved === "string"
+		? resolved
+		: (resolved as { default: string }).default;
 };
 
-const pdfModules = import.meta.glob('../content/hashcodes/**/*.pdf', { query: '?url' });
-const inputModules = import.meta.glob(['../content/hashcodes/**/*.in', '../content/hashcodes/**/*.in/*.txt'], { query: '?url' });
+const pdfModules = import.meta.glob("../content/hashcodes/**/*.pdf", {
+	query: "?url",
+});
+const inputModules = import.meta.glob(
+	["../content/hashcodes/**/*.in", "../content/hashcodes/**/*.in/*.txt"],
+	{ query: "?url" },
+);
 
-const contentPrefix = '../content/hashcodes/';
+const contentPrefix = "../content/hashcodes/";
 const entryBasePath = `${contentPrefix}${hashcode.id}`;
 
 const pdfKey = `${entryBasePath}.pdf` as keyof typeof pdfModules;
 const pdfResolver = pdfModules[pdfKey];
 const pdf = pdfResolver
-        ? {
-                name: pdfKey.split('/').at(-1) ?? '',
-                url: await toUrl(pdfResolver),
-        }
-        : null;
+	? {
+			name: pdfKey.split("/").at(-1) ?? "",
+			url: await toUrl(pdfResolver),
+		}
+	: null;
 
 const inputs = (
-        await Promise.all(
-                Object.entries(inputModules)
-                        .filter(([key]) => key.startsWith(`${entryBasePath}.in`))
-                        .map(async ([key, resolver]) => ({
-                                name: key.split('/').at(-1) ?? '',
-                                url: await toUrl(resolver),
-                        })),
-        )
+	await Promise.all(
+		Object.entries(inputModules)
+			.filter(([key]) => key.startsWith(`${entryBasePath}.in`))
+			.map(async ([key, resolver]) => ({
+				name: key.split("/").at(-1) ?? "",
+				url: await toUrl(resolver),
+			})),
+	)
 ).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
 const resources = {
-        pdf,
-        inputs,
+	pdf,
+	inputs,
 };
 const downloadsCount = resources.inputs.length + (resources.pdf ? 1 : 0);
 const downloadLabel = downloadsCount === 1 ? "file" : "files";
+const scoringEnabled = hashcode.data.scoring?.enabled ?? false;
+const scoringAvailable = scoringEnabled && resources.inputs.length > 0;
+const datasetLabel = (fileName: string): string => {
+	const normalized = fileName.replace(/\.in$/u, "");
+	const parts = normalized
+		.split(/[-_\s]+/u)
+		.map((part) => part.trim())
+		.filter(Boolean)
+		.map((part) => part.charAt(0).toUpperCase() + part.slice(1));
+	return parts.length > 0 ? parts.join(" ") : fileName;
+};
 ---
 <BaseLayout title={`${hashcode.data.title} — Hashy`} description={hashcode.data.description}>
         <section class="py-16 sm:py-24">
@@ -62,95 +80,422 @@ const downloadLabel = downloadsCount === 1 ? "file" : "files";
                                 Back to archive
                         </a>
 
-                        <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-                                <article class="surface px-6 py-8 sm:px-10 sm:py-12">
-                                        <div class="flex flex-wrap items-center gap-3 text-xs font-medium uppercase tracking-[0.3em] text-muted-foreground">
-                                                <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
-                                                        {hashcode.data.year}
-                                                </span>
-                                                <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
-                                                        {hashcode.data.round}
-                                                </span>
-                                        </div>
-                                        <h1 class="mt-6 text-4xl font-semibold sm:text-5xl">{hashcode.data.title}</h1>
-                                        <p class="mt-4 max-w-3xl text-base text-muted-foreground sm:text-lg">
-                                                {hashcode.data.description}
-                                        </p>
-                                </article>
-
-                                <aside class="surface px-6 py-6 sm:px-8">
-                                        <div class="space-y-4">
-                                                <div>
-                                                        <p class="text-xs uppercase tracking-[0.32em] text-muted-foreground">Overview</p>
-                                                        <p class="mt-2 text-sm text-muted-foreground">Quick metadata for this challenge.</p>
+                        <div class="grid gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+                                <div class="space-y-6">
+                                        <article class="surface px-6 py-8 sm:px-10 sm:py-12">
+                                                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">
+                                                        <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
+                                                                {hashcode.data.year}
+                                                        </span>
+                                                        <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
+                                                                {hashcode.data.round}
+                                                        </span>
                                                 </div>
-                                                <dl class="space-y-3 text-sm">
-                                                        <div class="flex items-center justify-between">
-                                                                <dt class="text-muted-foreground">Year</dt>
-                                                                <dd class="font-medium text-foreground">{hashcode.data.year}</dd>
-                                                        </div>
-                                                        <div class="flex items-center justify-between">
-                                                                <dt class="text-muted-foreground">Round</dt>
-                                                                <dd class="font-medium text-foreground capitalize">{hashcode.data.round}</dd>
-                                                        </div>
-                                                        <div class="flex items-center justify-between">
-                                                                <dt class="text-muted-foreground">Downloads</dt>
-                                                                <dd class="font-medium text-foreground">{downloadsCount} {downloadLabel}</dd>
-                                                        </div>
-                                                </dl>
-                                        </div>
-                                </aside>
-                        </div>
+                                                <div class="mt-6 space-y-4">
+                                                        <h1 class="text-4xl font-semibold sm:text-5xl">{hashcode.data.title}</h1>
+                                                        <p class="max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                                                                {hashcode.data.description}
+                                                        </p>
+                                                </div>
+                                        </article>
 
-                        <div class="surface px-6 py-8 sm:px-10">
-                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                        <div>
-                                                <h2 class="text-lg font-semibold text-foreground">Downloads</h2>
-                                                <p class="text-sm text-muted-foreground">Direct links to the statement and input datasets.</p>
-                                        </div>
-                                        <span class="text-xs uppercase tracking-[0.3em] text-muted-foreground">{downloadsCount} {downloadLabel}</span>
+                                        {scoringEnabled ? (
+                                                <section class="surface px-6 py-8 sm:px-10">
+                                                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                                <div>
+                                                                        <h2 class="text-lg font-semibold text-foreground">Submit a solution</h2>
+                                                                        <p class="text-sm text-muted-foreground">
+                                                                                Score your output against the official rules directly from the browser.
+                                                                        </p>
+                                                                </div>
+                                                                <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
+                                                                        Beta
+                                                                </span>
+                                                        </div>
+
+                                                        {scoringAvailable ? (
+                                                                <form class="mt-6 space-y-5" data-scoring-form data-year={hashcode.data.year} data-round={hashcode.data.round}>
+                                                                        <div class="space-y-2">
+                                                                                <label class="text-sm font-medium text-foreground" for="dataset">
+                                                                                        Input dataset
+                                                                                </label>
+                                                                                <select
+                                                                                        id="dataset"
+                                                                                        name="dataset"
+                                                                                        class="block w-full rounded-xl border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                                                        required
+                                                                                >
+                                                                                        {resources.inputs.map((input, index) => (
+                                                                                                <option value={input.name} selected={index === 0}>
+                                                                                                        {datasetLabel(input.name)}
+                                                                                                </option>
+                                                                                        ))}
+                                                                                </select>
+                                                                                <p class="text-xs text-muted-foreground">
+                                                                                        Pick the dataset you want to evaluate. Use the same filenames as in the statement.
+                                                                                </p>
+                                                                        </div>
+                                                                        <div class="space-y-2">
+                                                                                <label class="text-sm font-medium text-foreground" for="submission">
+                                                                                        Submission
+                                                                                </label>
+                                                                                <textarea
+                                                                                        id="submission"
+                                                                                        name="submission"
+                                                                                        rows={12}
+                                                                                        class="block w-full rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm leading-relaxed text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                                                        placeholder="Paste the contents of your .out file here."
+                                                                                        required
+                                                                                ></textarea>
+                                                                                <p class="text-xs text-muted-foreground">
+                                                                                        Submissions never leave your browser except for the scoring request sent to this page's API.
+                                                                                </p>
+                                                                        </div>
+                                                                        <div class="flex flex-wrap items-center gap-3">
+                                                                                <button
+                                                                                        type="submit"
+                                                                                        class="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+                                                                                        data-submit
+                                                                                >
+                                                                                        <span data-default-label>Score submission</span>
+                                                                                        <span class="hidden" data-loading-label>Scoring…</span>
+                                                                                </button>
+                                                                                <p class="text-xs text-muted-foreground">
+                                                                                        The scorer runs in Rust on the server and returns detailed validation errors when something goes wrong.
+                                                                                </p>
+                                                                        </div>
+                                                                        <div class="pt-2" data-scoring-results aria-live="polite"></div>
+                                                                </form>
+                                                        ) : (
+                                                                <div class="mt-6 rounded-2xl border border-dashed border-border/60 bg-background/40 px-6 py-5 text-sm text-muted-foreground">
+                                                                        Input datasets are not available for scoring yet. Check back soon to try the automated validator.
+                                                                </div>
+                                                        )}
+                                                </section>
+                                        ) : (
+                                                <section class="surface px-6 py-8 sm:px-10">
+                                                        <h2 class="text-lg font-semibold text-foreground">Scoring</h2>
+                                                        <p class="mt-2 text-sm text-muted-foreground">
+                                                                We're still wiring up the scorer for this round. Once it's live you'll be able to validate your submissions here.
+                                                        </p>
+                                                </section>
+                                        )}
                                 </div>
-                                <div class="mt-6 space-y-3">
-                                        {resources.pdf && (
-                                                <a
-                                                        class="group flex items-center justify-between rounded-xl border border-border/60 bg-background/60 px-5 py-4 transition hover:border-border/30 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                                                        href={resources.pdf.url}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                >
+                                <div class="space-y-6">
+                                        <aside class="surface px-6 py-7 sm:px-8">
+                                                <div class="space-y-4">
                                                         <div>
-                                                                <p class="text-sm font-medium text-foreground">Problem statement</p>
-                                                                <p class="mt-1 text-sm text-muted-foreground">{resources.pdf.name}</p>
+                                                                <p class="text-xs uppercase tracking-[0.32em] text-muted-foreground">Challenge quick facts</p>
+                                                                <p class="mt-2 text-sm text-muted-foreground">Concise metadata about this round.</p>
                                                         </div>
-                                                        <svg class="h-5 w-5 text-muted-foreground transition group-hover:text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                                <path d="M12 5v14" />
-                                                                <path d="m19 12-7 7-7-7" />
-                                                        </svg>
-                                                </a>
-                                        )}
-                                        {resources.inputs.map((input) => (
-                                                <a
-                                                        class="group flex items-center justify-between rounded-xl border border-border/60 bg-background/60 px-5 py-4 transition hover:border-border/30 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                                                        href={input.url}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                >
-                                                        <div>
-                                                                <p class="text-sm font-medium text-foreground">{input.name}</p>
-                                                                <p class="mt-1 text-xs uppercase tracking-[0.28em] text-muted-foreground">Input dataset</p>
-                                                        </div>
-                                                        <svg class="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                                <path d="m9 18 6-6-6-6" />
-                                                        </svg>
-                                                </a>
-                                        ))}
-                                        {downloadsCount === 0 && (
-                                                <div class="rounded-xl border border-dashed border-border/60 bg-background/40 px-6 py-5 text-sm text-muted-foreground">
-                                                        No downloads available yet for this challenge.
+                                                        <dl class="grid gap-4 text-sm sm:grid-cols-2">
+                                                                <div class="flex flex-col gap-1">
+                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Year</dt>
+                                                                        <dd class="text-sm font-medium text-foreground">{hashcode.data.year}</dd>
+                                                                </div>
+                                                                <div class="flex flex-col gap-1">
+                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Round</dt>
+                                                                        <dd class="text-sm font-medium capitalize text-foreground">{hashcode.data.round}</dd>
+                                                                </div>
+                                                                <div class="flex flex-col gap-1">
+                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Downloads</dt>
+                                                                        <dd class="text-sm font-medium text-foreground">{downloadsCount} {downloadLabel}</dd>
+                                                                </div>
+                                                        </dl>
                                                 </div>
-                                        )}
+                                        </aside>
+
+                                        <section class="surface px-6 py-8 sm:px-10">
+                                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                        <div>
+                                                                <h2 class="text-lg font-semibold text-foreground">Downloads</h2>
+                                                                <p class="text-sm text-muted-foreground">Direct links to the statement and official input datasets.</p>
+                                                        </div>
+                                                        <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
+                                                                {downloadsCount} {downloadLabel}
+                                                        </span>
+                                                </div>
+                                                <ul class="mt-6 space-y-3">
+                                                        {resources.pdf && (
+                                                                <li>
+                                                                        <a
+                                                                                class="group flex items-center justify-between rounded-2xl border border-border/60 bg-background/60 px-5 py-4 transition hover:border-border/40 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                                                href={resources.pdf.url}
+                                                                                target="_blank"
+                                                                                rel="noreferrer"
+                                                                        >
+                                                                                <div>
+                                                                                        <p class="text-sm font-medium text-foreground">Problem statement</p>
+                                                                                        <p class="mt-1 text-sm text-muted-foreground">{resources.pdf.name}</p>
+                                                                                </div>
+                                                                                <svg class="h-5 w-5 text-muted-foreground transition group-hover:text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                                        <path d="M12 5v14" />
+                                                                                        <path d="m19 12-7 7-7-7" />
+                                                                                </svg>
+                                                                        </a>
+                                                                </li>
+                                                        )}
+                                                        {resources.inputs.map((input) => (
+                                                                <li>
+                                                                        <a
+                                                                                class="group flex items-center justify-between rounded-2xl border border-border/60 bg-background/60 px-5 py-4 transition hover:border-border/40 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                                                href={input.url}
+                                                                                target="_blank"
+                                                                                rel="noreferrer"
+                                                                        >
+                                                                                <div>
+                                                                                        <p class="text-sm font-medium text-foreground">{datasetLabel(input.name)}</p>
+                                                                                        <p class="mt-1 text-xs uppercase tracking-[0.28em] text-muted-foreground">Input dataset</p>
+                                                                                </div>
+                                                                                <svg class="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                                                        <path d="m9 18 6-6-6-6" />
+                                                                                </svg>
+                                                                        </a>
+                                                                </li>
+                                                        ))}
+                                                        {downloadsCount === 0 && (
+                                                                <li>
+                                                                        <div class="rounded-2xl border border-dashed border-border/60 bg-background/40 px-6 py-5 text-sm text-muted-foreground">
+                                                                                No downloads available yet for this challenge.
+                                                                        </div>
+                                                                </li>
+                                                        )}
+                                                </ul>
+                                        </section>
                                 </div>
                         </div>
                 </div>
         </section>
+        <script type="module">
+                const scoringForms = document.querySelectorAll("[data-scoring-form]");
+
+                const escapeHtml = (value) =>
+                        String(value)
+                                .replace(/&/g, "&amp;")
+                                .replace(/</g, "&lt;")
+                                .replace(/>/g, "&gt;")
+                                .replace(/"/g, "&quot;")
+                                .replace(/'/g, "&#39;");
+
+                const formatLabel = (value) =>
+                        String(value)
+                                .split(/[_\s-]+/u)
+                                .map((part) => part.trim())
+                                .filter(Boolean)
+                                .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                                .join(" ");
+
+                const formatDetailValue = (value) => {
+                        if (typeof value === "number" && Number.isFinite(value)) {
+                                return { text: value.toLocaleString(), multiline: false, monospace: false };
+                        }
+                        if (value && typeof value === "object") {
+                                try {
+                                        return {
+                                                text: JSON.stringify(value, null, 2),
+                                                multiline: true,
+                                                monospace: true,
+                                        };
+                                } catch (error) {
+                                        const stringValue = String(value);
+                                        return { text: stringValue, multiline: /\n/u.test(stringValue), monospace: false };
+                                }
+                        }
+                        const text = value == null ? "" : String(value);
+                        const multiline = /\n/u.test(text);
+                        return { text, multiline, monospace: multiline };
+                };
+
+                const buildSuccess = (result) => {
+                        const rawScore = typeof result.score === "number" ? result.score : Number(result.score ?? 0);
+                        const scoreText = Number.isFinite(rawScore)
+                                ? rawScore.toLocaleString()
+                                : escapeHtml(String(result.score ?? ""));
+                        const dataset = typeof result.input_file === "string" ? result.input_file : "";
+                        const problem = typeof result.problem === "string" ? result.problem : "";
+                        const details =
+                                result && typeof result.details === "object" && result.details !== null
+                                        ? Object.entries(result.details)
+                                        : [];
+
+                        const metaSections = [];
+                        if (dataset) {
+                                metaSections.push(`<div class="flex flex-col gap-1"><dt class="text-xs uppercase tracking-[0.3em] text-emerald-200/60">Input Dataset</dt><dd class="text-sm font-medium text-emerald-100">${escapeHtml(dataset)}</dd></div>`);
+                        }
+                        if (problem) {
+                                metaSections.push(`<div class="flex flex-col gap-1"><dt class="text-xs uppercase tracking-[0.3em] text-emerald-200/60">Problem</dt><dd class="text-sm font-medium text-emerald-100">${escapeHtml(problem)}</dd></div>`);
+                        }
+
+                        let detailMarkup = "";
+                        if (details.length > 0) {
+                                const rows = details
+                                        .map(([key, value]) => {
+                                                const label = escapeHtml(formatLabel(String(key)));
+                                                const detail = formatDetailValue(value);
+                                                const classes = ["text-sm", "font-medium", "text-emerald-100"];
+                                                if (detail.monospace) {
+                                                        classes.push("font-mono", "text-xs", "leading-relaxed", "whitespace-pre-wrap");
+                                                } else if (detail.multiline) {
+                                                        classes.push("whitespace-pre-wrap");
+                                                }
+                                                return `<div class="flex flex-col gap-1"><dt class="text-xs uppercase tracking-[0.3em] text-emerald-200/60">${label}</dt><dd class="${classes.join(" ")}">${escapeHtml(detail.text)}</dd></div>`;
+                                        })
+                                        .join("");
+                                if (rows) {
+                                        detailMarkup = `<div class="mt-5"><h3 class="text-sm font-semibold text-emerald-100">Breakdown</h3><div class="mt-3 grid gap-3 sm:grid-cols-2">${rows}</div></div>`;
+                                }
+                        }
+
+                        const metaMarkup = metaSections.length > 0 ? `<dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2">${metaSections.join("")}</dl>` : "";
+
+                        return `<div class="rounded-2xl border border-emerald-500/40 bg-emerald-950/40 p-6 text-emerald-100">
+        <div class="flex items-center gap-3">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-200">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m5 13 4 4L19 7" />
+                        </svg>
+                </span>
+                <div>
+                        <p class="text-sm font-medium">Submission scored</p>
+                        <p class="text-2xl font-semibold text-emerald-100">${scoreText}</p>
+                </div>
+        </div>
+        ${metaMarkup}
+        ${detailMarkup}
+</div>`;
+                };
+
+                const buildError = (code, message, details) => {
+                        const safeCode = escapeHtml(code ?? "error");
+                        const safeMessage = escapeHtml(message ?? "An unexpected error occurred.");
+                        let detailsMarkup = "";
+                        if (details !== undefined) {
+                                let pretty = "";
+                                if (typeof details === "string") {
+                                        pretty = details;
+                                } else {
+                                        try {
+                                                pretty = JSON.stringify(details, null, 2);
+                                        } catch (error) {
+                                                pretty = String(details);
+                                        }
+                                }
+                                detailsMarkup = `<pre class="mt-4 overflow-x-auto rounded-xl bg-rose-950/40 px-4 py-3 text-xs leading-relaxed text-rose-100/80">${escapeHtml(pretty)}</pre>`;
+                        }
+                        return `<div class="rounded-2xl border border-rose-500/40 bg-rose-950/30 p-6 text-rose-100">
+        <div class="flex items-center gap-3">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500/10 text-rose-200">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 9v4" />
+                                <path d="M12 17h.01" />
+                                <path d="M5 21h14a2 2 0 0 0 2-2V8.24a2 2 0 0 0-.59-1.41l-7-7a2 2 0 0 0-2.82 0l-7 7A2 2 0 0 0 3 8.24V19a2 2 0 0 0 2 2Z" />
+                        </svg>
+                </span>
+                <div>
+                        <p class="text-sm font-semibold">${safeMessage}</p>
+                        <p class="text-xs uppercase tracking-[0.3em] text-rose-200/60">${safeCode}</p>
+                </div>
+        </div>
+        ${detailsMarkup}
+</div>`;
+                };
+
+                scoringForms.forEach((form) => {
+                        const results = form.querySelector("[data-scoring-results]");
+                        const datasetField = form.querySelector("[name=\"dataset\"]");
+                        const submissionField = form.querySelector("[name=\"submission\"]");
+                        const submitButton = form.querySelector("[data-submit]");
+                        const defaultLabel = submitButton?.querySelector("[data-default-label]");
+                        const loadingLabel = submitButton?.querySelector("[data-loading-label]");
+
+                        const setLoading = (loading) => {
+                                if (!submitButton) {
+                                        return;
+                                }
+                                submitButton.disabled = loading;
+                                submitButton.setAttribute("aria-busy", loading ? "true" : "false");
+                                if (defaultLabel && loadingLabel) {
+                                        if (loading) {
+                                                defaultLabel.classList.add("hidden");
+                                                loadingLabel.classList.remove("hidden");
+                                        } else {
+                                                defaultLabel.classList.remove("hidden");
+                                                loadingLabel.classList.add("hidden");
+                                        }
+                                }
+                        };
+
+                        form.addEventListener("submit", async (event) => {
+                                event.preventDefault();
+                                if (!results || !datasetField || !submissionField) {
+                                        return;
+                                }
+                                if (typeof form.reportValidity === "function" && !form.reportValidity()) {
+                                        return;
+                                }
+
+                                const dataset = datasetField.value.trim();
+                                const submission = submissionField.value;
+                                results.innerHTML = "";
+
+                                if (!dataset) {
+                                        results.innerHTML = buildError("missing-dataset", "Select an input dataset before scoring.");
+                                        datasetField.focus();
+                                        return;
+                                }
+
+                                if (!submission.trim()) {
+                                        results.innerHTML = buildError("empty-submission", "Add your submission content before scoring.");
+                                        submissionField.focus();
+                                        return;
+                                }
+
+                                setLoading(true);
+                                try {
+                                        const year = form.getAttribute("data-year") ?? "";
+                                        const round = form.getAttribute("data-round") ?? "";
+                                        const endpoint = `/api/hashcodes/${encodeURIComponent(year)}/${encodeURIComponent(round)}/${encodeURIComponent(dataset)}`;
+
+                                        const response = await fetch(endpoint, {
+                                                method: "POST",
+                                                body: submission,
+                                                headers: {
+                                                        "Content-Type": "text/plain;charset=utf-8",
+                                                },
+                                        });
+
+                                        let payload = null;
+                                        try {
+                                                payload = await response.json();
+                                        } catch (error) {
+                                                payload = null;
+                                        }
+
+                                        if (response.ok && payload && typeof payload === "object" && payload.status === "ok") {
+                                                const result = payload.result;
+                                                if (result && typeof result === "object") {
+                                                        results.innerHTML = buildSuccess(result);
+                                                } else {
+                                                        results.innerHTML = buildError("missing-result", "The scorer returned an empty payload.", payload);
+                                                }
+                                        } else {
+                                                const errorPayload =
+                                                        payload && typeof payload === "object" && payload.error && typeof payload.error === "object"
+                                                                ? payload.error
+                                                                : undefined;
+
+                                                const errorCode = errorPayload?.code ?? (response.ok ? "unknown-error" : `http-${response.status}`);
+                                                const errorMessage = errorPayload?.message ?? "Unable to score the submission.";
+                                                const errorDetails = errorPayload?.details ?? (response.ok ? undefined : payload);
+                                                results.innerHTML = buildError(errorCode, errorMessage, errorDetails);
+                                        }
+                                } catch (error) {
+                                        const message = error instanceof Error ? error.message : "Unexpected network error.";
+                                        results.innerHTML = buildError("network-error", message);
+                                } finally {
+                                        setLoading(false);
+                                }
+                        });
+                });
+        </script>
 </BaseLayout>

@@ -1,6 +1,9 @@
 {
-    "year": "2015",
-    "round": "final",
-    "title": "Loon",
-    "description": "Pilot Project Loon balloons through shifting winds to beam internet to the ground, plotting altitude changes that keep coverage strong over target cells."
+	"year": "2015",
+	"round": "final",
+	"title": "Loon",
+	"description": "Pilot Project Loon balloons through shifting winds to beam internet to the ground, plotting altitude changes that keep coverage strong over target cells.",
+	"scoring": {
+		"enabled": false
+	}
 }

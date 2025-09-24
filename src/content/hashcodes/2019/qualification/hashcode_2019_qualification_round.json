@@ -1,6 +1,9 @@
 {
-    "year": "2019",
-    "round": "qualification",
-    "title": "Photo slideshow",
-    "description": "Assemble a slideshow from tagged photos, sequencing horizontal and vertical shots so their tag transitions stay engaging and score high."
+	"year": "2019",
+	"round": "qualification",
+	"title": "Photo slideshow",
+	"description": "Assemble a slideshow from tagged photos, sequencing horizontal and vertical shots so their tag transitions stay engaging and score high.",
+	"scoring": {
+		"enabled": false
+	}
 }

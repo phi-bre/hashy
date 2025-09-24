@@ -1,6 +1,9 @@
 {
-    "year": "2019",
-    "round": "final",
-    "title": "Compiling Google",
-    "description": "Distribute massive build pipelines across compilation servers, planning job assignments and dependencies to minimize total build time."
+	"year": "2019",
+	"round": "final",
+	"title": "Compiling Google",
+	"description": "Distribute massive build pipelines across compilation servers, planning job assignments and dependencies to minimize total build time.",
+	"scoring": {
+		"enabled": false
+	}
 }
