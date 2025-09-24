@@ -1,6 +1,9 @@
 {
-    "year": "2016",
-    "round": "qualification",
-    "title": "Delivery",
-    "description": "Dispatch autonomous drones to deliver shopping orders, planning routes and assignments that respect battery limits while keeping customers happy."
+	"year": "2016",
+	"round": "qualification",
+	"title": "Delivery",
+	"description": "Dispatch autonomous drones to deliver shopping orders, planning routes and assignments that respect battery limits while keeping customers happy.",
+	"scoring": {
+		"enabled": false
+	}
 }

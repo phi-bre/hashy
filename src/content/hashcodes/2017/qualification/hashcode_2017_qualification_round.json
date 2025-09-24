@@ -1,6 +1,9 @@
 {
-    "year": "2017",
-    "round": "qualification",
-    "title": "Streaming videos",
-    "description": "Cache popular videos across a distributed network to reduce latency, deciding which clips live on which servers so viewers stream smoothly."
+	"year": "2017",
+	"round": "qualification",
+	"title": "Streaming videos",
+	"description": "Cache popular videos across a distributed network to reduce latency, deciding which clips live on which servers so viewers stream smoothly.",
+	"scoring": {
+		"enabled": false
+	}
 }

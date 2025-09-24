@@ -1,6 +1,9 @@
 {
-    "year": "2022",
-    "round": "final",
-    "title": "Santa Tracker",
-    "description": "Plan Santa\u2019s global gift route with experimental sled tech, coordinating flights and refuels so every child is visited right on time."
+	"year": "2022",
+	"round": "final",
+	"title": "Santa Tracker",
+	"description": "Plan Santa\u2019s global gift route with experimental sled tech, coordinating flights and refuels so every child is visited right on time.",
+	"scoring": {
+		"enabled": false
+	}
 }

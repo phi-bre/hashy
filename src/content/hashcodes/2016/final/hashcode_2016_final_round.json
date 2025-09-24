@@ -1,6 +1,9 @@
 {
-    "year": "2016",
-    "round": "final",
-    "title": "Satellites",
-    "description": "Schedule an imaging satellite fleet so they capture high-value targets worldwide, sequencing camera shots and slews within orbital and resource constraints."
+	"year": "2016",
+	"round": "final",
+	"title": "Satellites",
+	"description": "Schedule an imaging satellite fleet so they capture high-value targets worldwide, sequencing camera shots and slews within orbital and resource constraints.",
+	"scoring": {
+		"enabled": false
+	}
 }

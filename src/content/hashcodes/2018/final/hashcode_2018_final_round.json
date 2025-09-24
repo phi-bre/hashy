@@ -1,6 +1,9 @@
 {
-    "year": "2018",
-    "round": "final",
-    "title": "City Plan",
-    "description": "Design a futuristic city district by arranging zones and amenities, juggling space, livability, and utility constraints to create a balanced layout."
+	"year": "2018",
+	"round": "final",
+	"title": "City Plan",
+	"description": "Design a futuristic city district by arranging zones and amenities, juggling space, livability, and utility constraints to create a balanced layout.",
+	"scoring": {
+		"enabled": false
+	}
 }

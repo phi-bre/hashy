@@ -1,7 +1,13 @@
 {
-	"functions": {
-		"api/**/*.rs": {
-			"runtime": "vercel-rust@4.0.9"
-		}
-	}
+        "rewrites": [
+                {
+                        "source": "/api/hashcodes/:year/:round/:dataset",
+                        "destination": "/api/handler?year=:year&round=:round&dataset=:dataset"
+                }
+        ],
+        "functions": {
+                "api/**/*.rs": {
+                        "runtime": "vercel-rust@4.0.9"
+                }
+        }
 }
