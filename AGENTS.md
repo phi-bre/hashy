@@ -26,6 +26,7 @@ below to keep every year/round implementation aligned.
 - Re-use the shared error/response helpers from `src/hashcodes` instead of inventing new JSON structures.
 - Provide comprehensive validation errors that mirror the official statement rules and attach actionable details (e.g. “slice 3 overlaps slice 1”).
 - The solver and scorer implementations must include comments summarising the logic in terms of the PDF rules so future contributors can quickly compare code to statement requirements.
+- When turning on a new scorer, update the corresponding `src/content/hashcodes/**/<problem>.json` file so `scoring.enabled` is set to `true`. The Astro frontend hides problems whose scoring flag stays `false`.
 
 ## Testing expectations
 
