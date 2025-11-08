@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { hashcodeSlug } from "../utils/slug";
+import "pdfjs-dist/web/pdf_viewer.css";
 
 export async function getStaticPaths() {
 	const hashcodes = await getCollection("hashcodes");
@@ -278,11 +279,11 @@ const datasetLabel = (fileName: string): string => {
                                                         </a>
                                                 </div>
                                                 <div
-                                                        class="relative flex-1 overflow-auto bg-background/30"
+                                                        class="relative flex-1 bg-background/30"
                                                         data-pdf-viewer
                                                         data-src={resources.pdf.url}
                                                 >
-                                                        <div class="flex h-full flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground" data-pdf-placeholder>
+                                                        <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground" data-pdf-placeholder>
                                                                 <svg
                                                                         class="h-5 w-5 animate-spin text-muted-foreground"
                                                                         viewBox="0 0 24 24"
@@ -310,6 +311,43 @@ const datasetLabel = (fileName: string): string => {
         </div>
         </section>
 
+        <style is:global>
+                [data-pdf-viewer] {
+                        position: relative;
+                }
+
+                [data-pdf-viewer] .pdfjs-viewer-container {
+                        position: absolute;
+                        inset: 0;
+                        overflow: auto;
+                        padding: 1.5rem;
+                        background: transparent;
+                }
+
+                [data-pdf-viewer] .pdfViewer {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 1.5rem;
+                        margin: 0 auto;
+                }
+
+                [data-pdf-viewer] .pdfViewer .page {
+                        margin: 0 auto;
+                        border-radius: 0.75rem;
+                        overflow: hidden;
+                        background: #ffffff;
+                        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+                }
+
+                [data-pdf-viewer] .pdfViewer .page:last-child {
+                        margin-bottom: 0;
+                }
+
+                [data-pdf-viewer] .pdfViewer .textLayer ::selection {
+                        background: rgba(14, 116, 144, 0.35);
+                }
+        </style>
+
         <script type="module">
                 const pdfContainers = Array.from(document.querySelectorAll("[data-pdf-viewer][data-src]"));
 
@@ -331,25 +369,50 @@ const datasetLabel = (fileName: string): string => {
 
                         let pdfModule;
                         let workerModule;
+                        let viewerModule;
                         try {
-                                [pdfModule, workerModule] = await Promise.all([
+                                [pdfModule, workerModule, viewerModule] = await Promise.all([
                                         import("pdfjs-dist/build/pdf"),
                                         import("pdfjs-dist/build/pdf.worker?url"),
+                                        import("pdfjs-dist/web/pdf_viewer"),
                                 ]);
                         } catch (error) {
                                 if (placeholder) {
                                         placeholder.innerHTML =
                                                 '<p class="text-sm text-muted-foreground">Unable to load PDF viewer.</p>';
                                 }
-                                console.error("Failed to load PDF.js", error);
+                                console.error("Failed to load PDF.js viewer", error);
                                 return;
                         }
 
-                        const { getDocument, GlobalWorkerOptions } = pdfModule;
                         const workerSrc = workerModule && (workerModule.default ?? workerModule);
-                        if (workerSrc) {
+                        const { getDocument, GlobalWorkerOptions } = pdfModule;
+
+                        if (workerSrc && GlobalWorkerOptions) {
                                 GlobalWorkerOptions.workerSrc = workerSrc;
                         }
+
+                        const {
+                                EventBus,
+                                PDFViewer,
+                                PDFLinkService,
+                                TextLayerMode,
+                                AnnotationMode,
+                        } = viewerModule;
+
+                        const viewerContainer = document.createElement("div");
+                        viewerContainer.className = "pdfjs-viewer-container";
+                        viewerContainer.setAttribute("role", "presentation");
+                        viewerContainer.tabIndex = 0;
+                        viewerContainer.hidden = true;
+
+                        const viewer = document.createElement("div");
+                        viewer.className = "pdfViewer";
+                        viewerContainer.appendChild(viewer);
+                        container.appendChild(viewerContainer);
+
+                        const eventBus = new EventBus();
+                        const linkService = new PDFLinkService({ eventBus });
 
                         let pdfDocument;
                         try {
@@ -360,95 +423,42 @@ const datasetLabel = (fileName: string): string => {
                                                 '<p class="text-sm text-muted-foreground">Unable to load PDF.</p>';
                                 }
                                 console.error("Failed to fetch PDF", error);
+                                viewerContainer.remove();
                                 return;
                         }
 
                         container.dataset.pdfInitialized = "true";
 
-                        const content = document.createElement("div");
-                        content.className = "flex flex-col gap-6 p-6";
-                        container.replaceChildren(content);
-
-                        const entries = [];
-                        for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber += 1) {
-                                // eslint-disable-next-line no-await-in-loop
-                                const page = await pdfDocument.getPage(pageNumber);
-                                const canvasWrapper = document.createElement("div");
-                                canvasWrapper.className = "overflow-hidden rounded-xl border border-border/40 bg-background shadow-sm";
-                                const canvas = document.createElement("canvas");
-                                canvas.className = "block w-full bg-white";
-                                canvasWrapper.appendChild(canvas);
-                                content.appendChild(canvasWrapper);
-
-                                const context = canvas.getContext("2d");
-                                if (!context) {
-                                        continue;
-                                }
-
-                                entries.push({ page, canvas, context });
-                        }
-
-                        if (entries.length === 0) {
-                                content.innerHTML =
-                                        '<p class="text-sm text-muted-foreground">This PDF has no pages to display.</p>';
-                                return;
-                        }
-
-                        let isRendering = false;
-                        let rerenderRequested = false;
-
-                        const renderPages = async () => {
-                                if (isRendering) {
-                                        rerenderRequested = true;
-                                        return;
-                                }
-                                isRendering = true;
-                                rerenderRequested = false;
-
-                                try {
-                                        const width = container.clientWidth;
-                                        if (!width) {
-                                                return;
-                                        }
-
-                                        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-
-                                        for (const entry of entries) {
-                                                const baseViewport = entry.page.getViewport({ scale: 1 });
-                                                const scale = (width / baseViewport.width) * pixelRatio;
-                                                const viewport = entry.page.getViewport({ scale });
-
-                                                entry.canvas.width = Math.floor(viewport.width);
-                                                entry.canvas.height = Math.floor(viewport.height);
-                                                entry.canvas.style.width = `${viewport.width / pixelRatio}px`;
-                                                entry.canvas.style.height = `${viewport.height / pixelRatio}px`;
-
-                                                const renderTask = entry.page.render({
-                                                        canvasContext: entry.context,
-                                                        viewport,
-                                                });
-                                                // eslint-disable-next-line no-await-in-loop
-                                                await renderTask.promise;
-                                        }
-                                } catch (error) {
-                                        console.error("Failed to render PDF page", error);
-                                } finally {
-                                        isRendering = false;
-                                        if (rerenderRequested && container.isConnected) {
-                                                void renderPages();
-                                        }
-                                }
-                        };
-
-                        await renderPages();
-
-                        const resizeObserver = new ResizeObserver(() => {
-                                if (!container.isConnected) {
-                                        return;
-                                }
-                                void renderPages();
+                        const pdfViewer = new PDFViewer({
+                                container: viewerContainer,
+                                eventBus,
+                                linkService,
+                                textLayerMode:
+                                        typeof TextLayerMode !== "undefined"
+                                                ? TextLayerMode.ENABLE
+                                                : 1,
+                                annotationMode:
+                                        typeof AnnotationMode !== "undefined"
+                                                ? AnnotationMode.ENABLE
+                                                : 1,
+                                renderInteractiveForms: true,
+                                useOnlyCssZoom: true,
                         });
-                        resizeObserver.observe(container);
+
+                        linkService.setViewer(pdfViewer);
+
+                        eventBus.on("pagesinit", () => {
+                                pdfViewer.currentScaleValue = "page-width";
+                        });
+
+                        linkService.setDocument(pdfDocument, null);
+                        pdfViewer.setDocument(pdfDocument);
+
+                        viewerContainer.hidden = false;
+
+                        if (placeholder) {
+                                placeholder.remove();
+                        }
                 };
 
                 if (pdfContainers.length > 0) {
