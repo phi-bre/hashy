@@ -71,8 +71,9 @@ const datasetLabel = (fileName: string): string => {
 };
 ---
 <BaseLayout title={`${hashcode.data.title} — Hashy`} description={hashcode.data.description}>
+
         <section class="py-16 sm:py-24">
-                <div class="container space-y-12">
+                <div class="container flex flex-col gap-10">
                         <a class="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition hover:text-foreground" href="/">
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="m15 18-6-6 6-6" />
@@ -80,97 +81,119 @@ const datasetLabel = (fileName: string): string => {
                                 Back to archive
                         </a>
 
-                        <div class="grid gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-                                <div class="space-y-6">
-                                        <article class="surface px-6 py-8 sm:px-10 sm:py-12">
-                                                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">
-                                                        <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
-                                                                {hashcode.data.year}
-                                                        </span>
-                                                        <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
-                                                                {hashcode.data.round}
-                                                        </span>
+                        <div class="grid gap-10 xl:grid-cols-[minmax(0,3.25fr)_minmax(0,2.75fr)] xl:items-start">
+                                <div class="flex flex-col gap-10">
+                                        <article class="surface overflow-hidden">
+                                                <div class="border-b border-border/60 bg-gradient-to-r from-background via-background/80 to-background px-6 py-6 sm:px-10 sm:py-8">
+                                                        <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">
+                                                                <span class="inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/60 px-3 py-1">
+                                                                        {hashcode.data.year}
+                                                                </span>
+                                                                <span class="inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/60 px-3 py-1">
+                                                                        {hashcode.data.round}
+                                                                </span>
+                                                        </div>
+                                                        <div class="mt-6 space-y-4">
+                                                                <h1 class="text-4xl font-semibold sm:text-5xl">{hashcode.data.title}</h1>
+                                                                <p class="max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+                                                                        {hashcode.data.description}
+                                                                </p>
+                                                        </div>
                                                 </div>
-                                                <div class="mt-6 space-y-4">
-                                                        <h1 class="text-4xl font-semibold sm:text-5xl">{hashcode.data.title}</h1>
-                                                        <p class="max-w-3xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                                                                {hashcode.data.description}
-                                                        </p>
+                                                <div class="px-6 py-6 sm:px-10 sm:py-8">
+                                                        <dl class="grid gap-6 sm:grid-cols-3">
+                                                                <div class="flex flex-col gap-1">
+                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Year</dt>
+                                                                        <dd class="text-base font-semibold text-foreground">{hashcode.data.year}</dd>
+                                                                </div>
+                                                                <div class="flex flex-col gap-1">
+                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Round</dt>
+                                                                        <dd class="text-base font-semibold capitalize text-foreground">{hashcode.data.round}</dd>
+                                                                </div>
+                                                                <div class="flex flex-col gap-1">
+                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Downloads</dt>
+                                                                        <dd class="text-base font-semibold text-foreground">{downloadsCount} {downloadLabel}</dd>
+                                                                </div>
+                                                        </dl>
                                                 </div>
                                         </article>
 
                                         {scoringEnabled ? (
-                                                <section class="surface px-6 py-8 sm:px-10">
-                                                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                                                <div>
+                                                <section class="surface overflow-hidden">
+                                                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 bg-background/60 px-6 py-5 sm:px-10">
+                                                                <div class="space-y-1">
                                                                         <h2 class="text-lg font-semibold text-foreground">Submit a solution</h2>
                                                                         <p class="text-sm text-muted-foreground">
                                                                                 Score your output against the official rules directly from the browser.
                                                                         </p>
                                                                 </div>
-                                                                <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
+                                                                <span class="inline-flex items-center rounded-full border border-border/40 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
                                                                         Beta
                                                                 </span>
                                                         </div>
-
-                                                        {scoringAvailable ? (
-                                                                <form class="mt-6 space-y-5" data-scoring-form data-year={hashcode.data.year} data-round={hashcode.data.round}>
-                                                                        <div class="space-y-2">
-                                                                                <label class="text-sm font-medium text-foreground" for="dataset">
-                                                                                        Input dataset
-                                                                                </label>
-                                                                                <select
-                                                                                        id="dataset"
-                                                                                        name="dataset"
-                                                                                        class="block w-full rounded-xl border border-border/60 bg-background/60 px-4 py-2 text-sm text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                                                                                        required
-                                                                                >
-                                                                                        {resources.inputs.map((input, index) => (
-                                                                                                <option value={input.name} selected={index === 0}>
-                                                                                                        {datasetLabel(input.name)}
+                                                        <div class="px-6 py-6 sm:px-10">
+                                                                {scoringAvailable ? (
+                                                                        <form class="space-y-6" method="post" data-scoring-form data-year={hashcode.data.year} data-round={hashcode.data.round}>
+                                                                                <div class="space-y-2">
+                                                                                        <label class="text-sm font-medium text-foreground" for="dataset">
+                                                                                                Dataset
+                                                                                        </label>
+                                                                                        <select
+                                                                                                id="dataset"
+                                                                                                name="dataset"
+                                                                                                class="block w-full rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                                                                required
+                                                                                        >
+                                                                                                <option value="" disabled selected>
+                                                                                                        Select a dataset
                                                                                                 </option>
-                                                                                        ))}
-                                                                                </select>
-                                                                                <p class="text-xs text-muted-foreground">
-                                                                                        Pick the dataset you want to evaluate. Use the same filenames as in the statement.
-                                                                                </p>
+                                                                                                {resources.inputs.map((input, index) => (
+                                                                                                        <option value={input.name} selected={index === 0}>
+                                                                                                                {datasetLabel(input.name)}
+                                                                                                        </option>
+                                                                                                ))}
+                                                                                        </select>
+                                                                                        <p class="text-xs text-muted-foreground">
+                                                                                                Pick the dataset you want to evaluate. Use the same filenames as in the statement.
+                                                                                        </p>
+                                                                                </div>
+                                                                                <div class="space-y-2">
+                                                                                        <label class="text-sm font-medium text-foreground" for="submission">
+                                                                                                Submission file
+                                                                                        </label>
+                                                                                        <input
+                                                                                                id="submission"
+                                                                                                name="submission"
+                                                                                                type="file"
+                                                                                                accept=".out,.txt,.ans,text/plain"
+                                                                                                class="block w-full cursor-pointer rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm text-muted-foreground file:mr-4 file:rounded-xl file:border-0 file:bg-foreground file:px-4 file:py-2 file:text-sm file:font-medium file:text-background hover:file:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                                                                                required
+                                                                                        />
+                                                                                        <p class="text-xs text-muted-foreground">
+                                                                                                Submissions stay in your browser and are only read to send the scoring request to this page's API.
+                                                                                        </p>
+                                                                                </div>
+                                                                                <div class="flex flex-wrap items-center gap-3">
+                                                                                        <button
+                                                                                                type="submit"
+                                                                                                class="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+                                                                                                data-submit
+                                                                                        >
+                                                                                                <span data-default-label>Score submission</span>
+                                                                                                <span class="hidden" data-loading-label>Scoring…</span>
+                                                                                        </button>
+                                                                                        <p class="text-xs text-muted-foreground">
+                                                                                                The scorer runs in Rust on the server and returns detailed validation errors when something goes wrong.
+                                                                                        </p>
+                                                                                </div>
+                                                                                <div class="pt-2" data-scoring-results aria-live="polite"></div>
+                                                                        </form>
+                                                                ) : (
+                                                                        <div class="rounded-2xl border border-dashed border-border/60 bg-background/40 px-6 py-5 text-sm text-muted-foreground">
+                                                                                Input datasets are not available for scoring yet. Check back soon to try the automated validator.
                                                                         </div>
-                                                                        <div class="space-y-2">
-                                                                                <label class="text-sm font-medium text-foreground" for="submission">
-                                                                                        Submission
-                                                                                </label>
-                                                                                <textarea
-                                                                                        id="submission"
-                                                                                        name="submission"
-                                                                                        rows={12}
-                                                                                        class="block w-full rounded-2xl border border-border/60 bg-background/60 px-4 py-3 text-sm leading-relaxed text-foreground transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                                                                                        placeholder="Paste the contents of your .out file here."
-                                                                                        required
-                                                                                ></textarea>
-                                                                                <p class="text-xs text-muted-foreground">
-                                                                                        Submissions never leave your browser except for the scoring request sent to this page's API.
-                                                                                </p>
-                                                                        </div>
-                                                                        <div class="flex flex-wrap items-center gap-3">
-                                                                                <button
-                                                                                        type="submit"
-                                                                                        class="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:bg-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
-                                                                                        data-submit
-                                                                                >
-                                                                                        <span data-default-label>Score submission</span>
-                                                                                        <span class="hidden" data-loading-label>Scoring…</span>
-                                                                                </button>
-                                                                                <p class="text-xs text-muted-foreground">
-                                                                                        The scorer runs in Rust on the server and returns detailed validation errors when something goes wrong.
-                                                                                </p>
-                                                                        </div>
-                                                                        <div class="pt-2" data-scoring-results aria-live="polite"></div>
-                                                                </form>
-                                                        ) : (
-                                                                <div class="mt-6 rounded-2xl border border-dashed border-border/60 bg-background/40 px-6 py-5 text-sm text-muted-foreground">
-                                                                        Input datasets are not available for scoring yet. Check back soon to try the automated validator.
-                                                                </div>
-                                                        )}
+                                                                )}
+                                                        </div>
                                                 </section>
                                         ) : (
                                                 <section class="surface px-6 py-8 sm:px-10">
@@ -180,30 +203,6 @@ const datasetLabel = (fileName: string): string => {
                                                         </p>
                                                 </section>
                                         )}
-                                </div>
-                                <div class="space-y-6">
-                                        <aside class="surface px-6 py-7 sm:px-8">
-                                                <div class="space-y-4">
-                                                        <div>
-                                                                <p class="text-xs uppercase tracking-[0.32em] text-muted-foreground">Challenge quick facts</p>
-                                                                <p class="mt-2 text-sm text-muted-foreground">Concise metadata about this round.</p>
-                                                        </div>
-                                                        <dl class="grid gap-4 text-sm sm:grid-cols-2">
-                                                                <div class="flex flex-col gap-1">
-                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Year</dt>
-                                                                        <dd class="text-sm font-medium text-foreground">{hashcode.data.year}</dd>
-                                                                </div>
-                                                                <div class="flex flex-col gap-1">
-                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Round</dt>
-                                                                        <dd class="text-sm font-medium capitalize text-foreground">{hashcode.data.round}</dd>
-                                                                </div>
-                                                                <div class="flex flex-col gap-1">
-                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Downloads</dt>
-                                                                        <dd class="text-sm font-medium text-foreground">{downloadsCount} {downloadLabel}</dd>
-                                                                </div>
-                                                        </dl>
-                                                </div>
-                                        </aside>
 
                                         <section class="surface px-6 py-8 sm:px-10">
                                                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -211,7 +210,7 @@ const datasetLabel = (fileName: string): string => {
                                                                 <h2 class="text-lg font-semibold text-foreground">Downloads</h2>
                                                                 <p class="text-sm text-muted-foreground">Direct links to the statement and official input datasets.</p>
                                                         </div>
-                                                        <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
+                                                        <span class="inline-flex items-center rounded-full border border-border/40 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
                                                                 {downloadsCount} {downloadLabel}
                                                         </span>
                                                 </div>
@@ -262,11 +261,202 @@ const datasetLabel = (fileName: string): string => {
                                                         )}
                                                 </ul>
                                         </section>
-                                </div>
                         </div>
+
+                        <aside class="hidden xl:flex">
+                                {resources.pdf ? (
+                                        <div class="surface flex h-[calc(100vh-10rem)] w-full flex-col overflow-hidden">
+                                                <div class="flex items-center justify-between gap-3 border-b border-border/60 bg-background/60 px-6 py-4">
+                                                        <p class="text-sm font-semibold text-foreground">Problem statement</p>
+                                                        <a
+                                                                class="inline-flex items-center gap-2 rounded-xl border border-border/60 px-3 py-1.5 text-xs font-medium text-foreground transition hover:border-border/40 hover:text-foreground"
+                                                                href={resources.pdf.url}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                        >
+                                                                Open in new tab
+                                                        </a>
+                                                </div>
+                                                <div
+                                                        class="relative flex-1 overflow-auto bg-background/30"
+                                                        data-pdf-viewer
+                                                        data-src={resources.pdf.url}
+                                                >
+                                                        <div class="flex h-full flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground" data-pdf-placeholder>
+                                                                <svg
+                                                                        class="h-5 w-5 animate-spin text-muted-foreground"
+                                                                        viewBox="0 0 24 24"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        stroke-width="1.5"
+                                                                        stroke-linecap="round"
+                                                                        stroke-linejoin="round"
+                                                                        aria-hidden="true"
+                                                                >
+                                                                        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                                                                </svg>
+                                                                <p>Loading PDF…</p>
+                                                        </div>
+                                                </div>
+                                        </div>
+                                ) : (
+                                        <div class="surface flex h-[calc(100vh-10rem)] w-full flex-col items-center justify-center gap-3 px-6 text-center">
+                                                <p class="text-sm font-medium text-foreground">Problem statement unavailable</p>
+                                                <p class="text-sm text-muted-foreground">We'll add the PDF for this round as soon as it's ready.</p>
+                                        </div>
+                                )}
+                        </aside>
                 </div>
+        </div>
         </section>
+
         <script type="module">
+                const pdfContainers = Array.from(document.querySelectorAll("[data-pdf-viewer][data-src]"));
+
+                const initializePdfViewer = async (container) => {
+                        if (!container || container.dataset.pdfInitialized === "true") {
+                                return;
+                        }
+
+                        const src = container.dataset.src;
+                        const placeholder = container.querySelector("[data-pdf-placeholder]");
+
+                        if (!src) {
+                                if (placeholder) {
+                                        placeholder.innerHTML =
+                                                '<p class="text-sm text-muted-foreground">PDF unavailable.</p>';
+                                }
+                                return;
+                        }
+
+                        let pdfModule;
+                        let workerModule;
+                        try {
+                                [pdfModule, workerModule] = await Promise.all([
+                                        import("pdfjs-dist/build/pdf"),
+                                        import("pdfjs-dist/build/pdf.worker?url"),
+                                ]);
+                        } catch (error) {
+                                if (placeholder) {
+                                        placeholder.innerHTML =
+                                                '<p class="text-sm text-muted-foreground">Unable to load PDF viewer.</p>';
+                                }
+                                console.error("Failed to load PDF.js", error);
+                                return;
+                        }
+
+                        const { getDocument, GlobalWorkerOptions } = pdfModule;
+                        const workerSrc = workerModule && (workerModule.default ?? workerModule);
+                        if (workerSrc) {
+                                GlobalWorkerOptions.workerSrc = workerSrc;
+                        }
+
+                        let pdfDocument;
+                        try {
+                                pdfDocument = await getDocument({ url: src }).promise;
+                        } catch (error) {
+                                if (placeholder) {
+                                        placeholder.innerHTML =
+                                                '<p class="text-sm text-muted-foreground">Unable to load PDF.</p>';
+                                }
+                                console.error("Failed to fetch PDF", error);
+                                return;
+                        }
+
+                        container.dataset.pdfInitialized = "true";
+
+                        const content = document.createElement("div");
+                        content.className = "flex flex-col gap-6 p-6";
+                        container.replaceChildren(content);
+
+                        const entries = [];
+                        for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber += 1) {
+                                // eslint-disable-next-line no-await-in-loop
+                                const page = await pdfDocument.getPage(pageNumber);
+                                const canvasWrapper = document.createElement("div");
+                                canvasWrapper.className = "overflow-hidden rounded-xl border border-border/40 bg-background shadow-sm";
+                                const canvas = document.createElement("canvas");
+                                canvas.className = "block w-full bg-white";
+                                canvasWrapper.appendChild(canvas);
+                                content.appendChild(canvasWrapper);
+
+                                const context = canvas.getContext("2d");
+                                if (!context) {
+                                        continue;
+                                }
+
+                                entries.push({ page, canvas, context });
+                        }
+
+                        if (entries.length === 0) {
+                                content.innerHTML =
+                                        '<p class="text-sm text-muted-foreground">This PDF has no pages to display.</p>';
+                                return;
+                        }
+
+                        let isRendering = false;
+                        let rerenderRequested = false;
+
+                        const renderPages = async () => {
+                                if (isRendering) {
+                                        rerenderRequested = true;
+                                        return;
+                                }
+                                isRendering = true;
+                                rerenderRequested = false;
+
+                                try {
+                                        const width = container.clientWidth;
+                                        if (!width) {
+                                                return;
+                                        }
+
+                                        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+
+                                        for (const entry of entries) {
+                                                const baseViewport = entry.page.getViewport({ scale: 1 });
+                                                const scale = (width / baseViewport.width) * pixelRatio;
+                                                const viewport = entry.page.getViewport({ scale });
+
+                                                entry.canvas.width = Math.floor(viewport.width);
+                                                entry.canvas.height = Math.floor(viewport.height);
+                                                entry.canvas.style.width = `${viewport.width / pixelRatio}px`;
+                                                entry.canvas.style.height = `${viewport.height / pixelRatio}px`;
+
+                                                const renderTask = entry.page.render({
+                                                        canvasContext: entry.context,
+                                                        viewport,
+                                                });
+                                                // eslint-disable-next-line no-await-in-loop
+                                                await renderTask.promise;
+                                        }
+                                } catch (error) {
+                                        console.error("Failed to render PDF page", error);
+                                } finally {
+                                        isRendering = false;
+                                        if (rerenderRequested && container.isConnected) {
+                                                void renderPages();
+                                        }
+                                }
+                        };
+
+                        await renderPages();
+
+                        const resizeObserver = new ResizeObserver(() => {
+                                if (!container.isConnected) {
+                                        return;
+                                }
+                                void renderPages();
+                        });
+                        resizeObserver.observe(container);
+                };
+
+                if (pdfContainers.length > 0) {
+                        for (const container of pdfContainers) {
+                                void initializePdfViewer(container);
+                        }
+                }
+
                 const scoringForms = document.querySelectorAll("[data-scoring-form]");
 
                 const escapeHtml = (value) =>
@@ -414,6 +604,12 @@ const datasetLabel = (fileName: string): string => {
                                 }
                                 submitButton.disabled = loading;
                                 submitButton.setAttribute("aria-busy", loading ? "true" : "false");
+                                if (datasetField instanceof HTMLSelectElement) {
+                                        datasetField.disabled = loading;
+                                }
+                                if (submissionField instanceof HTMLInputElement) {
+                                        submissionField.disabled = loading;
+                                }
                                 if (defaultLabel && loadingLabel) {
                                         if (loading) {
                                                 defaultLabel.classList.add("hidden");
@@ -434,8 +630,12 @@ const datasetLabel = (fileName: string): string => {
                                         return;
                                 }
 
+                                if (!(datasetField instanceof HTMLSelectElement) || !(submissionField instanceof HTMLInputElement)) {
+                                        return;
+                                }
+
                                 const dataset = datasetField.value.trim();
-                                const submission = submissionField.value;
+                                const file = submissionField.files && submissionField.files[0] ? submissionField.files[0] : null;
                                 results.innerHTML = "";
 
                                 if (!dataset) {
@@ -444,8 +644,30 @@ const datasetLabel = (fileName: string): string => {
                                         return;
                                 }
 
+                                if (!file) {
+                                        results.innerHTML = buildError("missing-file", "Upload a submission file before scoring.");
+                                        submissionField.focus();
+                                        return;
+                                }
+
+                                let submission = "";
+                                try {
+                                        submission = await file.text();
+                                } catch (error) {
+                                        results.innerHTML = buildError(
+                                                "file-read-error",
+                                                "We couldn't read that file. Please upload a valid text submission.",
+                                        );
+                                        submissionField.value = "";
+                                        submissionField.focus();
+                                        return;
+                                }
+
                                 if (!submission.trim()) {
-                                        results.innerHTML = buildError("empty-submission", "Add your submission content before scoring.");
+                                        results.innerHTML = buildError(
+                                                "empty-file",
+                                                "The uploaded submission file is empty. Add content before scoring.",
+                                        );
                                         submissionField.focus();
                                         return;
                                 }
