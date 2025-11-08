@@ -60,15 +60,7 @@ const downloadsCount = resources.inputs.length + (resources.pdf ? 1 : 0);
 const downloadLabel = downloadsCount === 1 ? "file" : "files";
 const scoringEnabled = hashcode.data.scoring?.enabled ?? false;
 const scoringAvailable = scoringEnabled && resources.inputs.length > 0;
-const datasetLabel = (fileName: string): string => {
-	const normalized = fileName.replace(/\.in$/u, "");
-	const parts = normalized
-		.split(/[-_\s]+/u)
-		.map((part) => part.trim())
-		.filter(Boolean)
-		.map((part) => part.charAt(0).toUpperCase() + part.slice(1));
-	return parts.length > 0 ? parts.join(" ") : fileName;
-};
+const datasetLabel = (fileName: string): string => fileName;
 ---
 <BaseLayout title={`${hashcode.data.title} — Hashy`} description={hashcode.data.description}>
         <section class="py-16 sm:py-24">
