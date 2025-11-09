@@ -31,7 +31,7 @@ const sortedYears = [...groupedByYear.keys()].sort((a, b) => {
                 <div class="container">
                         <div class="panel px-8 py-14 sm:px-12 sm:py-16">
                                 <div class="mx-auto max-w-3xl">
-                                        <span class="text-xs font-medium uppercase tracking-[0.32em] text-muted-foreground">Hashy</span>
+                                        <span class="text-xs font-medium uppercase text-muted-foreground">Hashy</span>
                                         <h1 class="mt-6 text-4xl font-semibold sm:text-5xl">The Google Hash Code archive.</h1>
                                         <p class="mt-4 text-base text-muted-foreground sm:text-lg">
                                                 Every round, statement, and dataset organised for quick reference and download.
@@ -75,10 +75,10 @@ const sortedYears = [...groupedByYear.keys()].sort((a, b) => {
                                         <div class={`surface px-6 py-8 sm:px-10 sm:py-10`} id={`year-${year}`}>
                                                 <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                                                         <div>
-                                                                <p class="text-xs uppercase tracking-[0.32em] text-muted-foreground">Year</p>
+                                                                <p class="text-xs uppercase text-muted-foreground">Year</p>
                                                                 <h2 class="text-3xl font-semibold text-foreground sm:text-4xl">{year}</h2>
                                                         </div>
-                                                        <p class="text-xs uppercase tracking-[0.24em] text-muted-foreground">{entries.length} round{entries.length === 1 ? "" : "s"}</p>
+                                                        <p class="text-xs uppercase text-muted-foreground">{entries.length} round{entries.length === 1 ? "" : "s"}</p>
                                                 </div>
                                                 <div class="mt-8 grid gap-4 sm:grid-cols-2">
                                                         {entries.map((hashcode) => {
@@ -88,7 +88,7 @@ const sortedYears = [...groupedByYear.keys()].sort((a, b) => {
                                                                                 class="group flex h-full flex-col justify-between rounded-2xl border border-border/60 bg-background/60 p-5 transition hover:border-border/30 hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                                                                                 href={`/${slug}`}
                                                                         >
-                                                                                <div class="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
+                                                                                <div class="flex items-center gap-2 text-xs font-medium uppercase text-muted-foreground">
                                                                                         <span>{hashcode.data.round}</span>
                                                                                         <span class="inline-flex h-1 w-1 rounded-full bg-muted-foreground/40"></span>
                                                                                         <span>{hashcode.data.year}</span>

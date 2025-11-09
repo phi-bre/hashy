@@ -75,7 +75,7 @@ const datasetLabel = (fileName: string): string => fileName;
                         <div class="grid gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
                                 <div class="space-y-6">
                                         <article class="surface px-6 py-8 sm:px-10 sm:py-12">
-                                                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">
+                                                <div class="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase text-muted-foreground">
                                                         <span class="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1">
                                                                 {hashcode.data.year}
                                                         </span>
@@ -100,7 +100,7 @@ const datasetLabel = (fileName: string): string => fileName;
                                                                                 Score your output against the official rules directly from the browser.
                                                                         </p>
                                                                 </div>
-                                                                <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
+                                                                <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase text-muted-foreground">
                                                                         Beta
                                                                 </span>
                                                         </div>
@@ -177,20 +177,20 @@ const datasetLabel = (fileName: string): string => fileName;
                                         <aside class="surface px-6 py-7 sm:px-8">
                                                 <div class="space-y-4">
                                                         <div>
-                                                                <p class="text-xs uppercase tracking-[0.32em] text-muted-foreground">Challenge quick facts</p>
+                                                                <p class="text-xs uppercase text-muted-foreground">Challenge quick facts</p>
                                                                 <p class="mt-2 text-sm text-muted-foreground">Concise metadata about this round.</p>
                                                         </div>
                                                         <dl class="grid gap-4 text-sm sm:grid-cols-2">
                                                                 <div class="flex flex-col gap-1">
-                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Year</dt>
+                                                                        <dt class="text-xs uppercase text-muted-foreground">Year</dt>
                                                                         <dd class="text-sm font-medium text-foreground">{hashcode.data.year}</dd>
                                                                 </div>
                                                                 <div class="flex flex-col gap-1">
-                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Round</dt>
+                                                                        <dt class="text-xs uppercase text-muted-foreground">Round</dt>
                                                                         <dd class="text-sm font-medium capitalize text-foreground">{hashcode.data.round}</dd>
                                                                 </div>
                                                                 <div class="flex flex-col gap-1">
-                                                                        <dt class="text-xs uppercase tracking-[0.3em] text-muted-foreground">Downloads</dt>
+                                                                        <dt class="text-xs uppercase text-muted-foreground">Downloads</dt>
                                                                         <dd class="text-sm font-medium text-foreground">{downloadsCount} {downloadLabel}</dd>
                                                                 </div>
                                                         </dl>
@@ -203,7 +203,7 @@ const datasetLabel = (fileName: string): string => fileName;
                                                                 <h2 class="text-lg font-semibold text-foreground">Downloads</h2>
                                                                 <p class="text-sm text-muted-foreground">Direct links to the statement and official input datasets.</p>
                                                         </div>
-                                                        <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground">
+                                                        <span class="inline-flex items-center rounded-full border border-border/50 px-3 py-1 text-xs uppercase text-muted-foreground">
                                                                 {downloadsCount} {downloadLabel}
                                                         </span>
                                                 </div>
@@ -237,7 +237,7 @@ const datasetLabel = (fileName: string): string => fileName;
                                                                         >
                                                                                 <div>
                                                                                         <p class="text-sm font-medium text-foreground">{datasetLabel(input.name)}</p>
-                                                                                        <p class="mt-1 text-xs uppercase tracking-[0.28em] text-muted-foreground">Input dataset</p>
+                                                                                        <p class="mt-1 text-xs uppercase text-muted-foreground">Input dataset</p>
                                                                                 </div>
                                                                                 <svg class="h-5 w-5 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                                                                         <path d="m9 18 6-6-6-6" />
@@ -312,10 +312,10 @@ const datasetLabel = (fileName: string): string => fileName;
 
                         const metaSections = [];
                         if (dataset) {
-                                metaSections.push(`<div class="flex flex-col gap-1"><dt class="text-xs uppercase tracking-[0.3em] text-emerald-200/60">Input Dataset</dt><dd class="text-sm font-medium text-emerald-100">${escapeHtml(dataset)}</dd></div>`);
+                                metaSections.push(`<div class="flex flex-col gap-1"><dt class="text-xs uppercase text-emerald-200/60">Input Dataset</dt><dd class="text-sm font-medium text-emerald-100">${escapeHtml(dataset)}</dd></div>`);
                         }
                         if (problem) {
-                                metaSections.push(`<div class="flex flex-col gap-1"><dt class="text-xs uppercase tracking-[0.3em] text-emerald-200/60">Problem</dt><dd class="text-sm font-medium text-emerald-100">${escapeHtml(problem)}</dd></div>`);
+                                metaSections.push(`<div class="flex flex-col gap-1"><dt class="text-xs uppercase text-emerald-200/60">Problem</dt><dd class="text-sm font-medium text-emerald-100">${escapeHtml(problem)}</dd></div>`);
                         }
 
                         let detailMarkup = "";
@@ -330,7 +330,7 @@ const datasetLabel = (fileName: string): string => fileName;
                                                 } else if (detail.multiline) {
                                                         classes.push("whitespace-pre-wrap");
                                                 }
-                                                return `<div class="flex flex-col gap-1"><dt class="text-xs uppercase tracking-[0.3em] text-emerald-200/60">${label}</dt><dd class="${classes.join(" ")}">${escapeHtml(detail.text)}</dd></div>`;
+                                                return `<div class="flex flex-col gap-1"><dt class="text-xs uppercase text-emerald-200/60">${label}</dt><dd class="${classes.join(" ")}">${escapeHtml(detail.text)}</dd></div>`;
                                         })
                                         .join("");
                                 if (rows) {
@@ -385,7 +385,7 @@ const datasetLabel = (fileName: string): string => fileName;
                 </span>
                 <div>
                         <p class="text-sm font-semibold">${safeMessage}</p>
-                        <p class="text-xs uppercase tracking-[0.3em] text-rose-200/60">${safeCode}</p>
+                        <p class="text-xs uppercase text-rose-200/60">${safeCode}</p>
                 </div>
         </div>
         ${detailsMarkup}
