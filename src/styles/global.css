@@ -55,7 +55,7 @@ a {
         h4,
         h5,
         h6 {
-                @apply font-semibold tracking-tight text-foreground;
+                @apply font-semibold text-foreground;
         }
 }
 
